@@ -8,7 +8,7 @@
 // Biblioteca gerada pelo arquivo .pio durante compilação.
 #include "ws2818b.pio.h"
 
-// Definição do número de LEDs e pino.
+// Definição do número de LEDs e pinos.
 #define LED_COUNT 25
 #define MATRIZ_LED_PIN 7
 #define BUTTON_A 5
@@ -36,11 +36,12 @@ int index_posicoes_nove[]   = {1,8,11,12,13,14,15,18,21,22,23,24};         // Ta
 // Váriaveis volatile para indicar ao compilador que elas serão alteradas por eventos externos
 
 // Variável usada para saber em quanto está o contador que será mostrado na matriz de leds
-// Caso a interrupção 2 seja acionada esta variável é decrementada e o contrario acontece caso a interrupção 1 seja acionada
+// Caso a interrupção seja acionada pelo botão B seja acionada esta variável é decrementada
+// E o contrario acontece caso a interrupção seja acionada pelo botão A
 static volatile int incrementa_ou_decrementa_led = 0;
 
-volatile bool atualiza_leds = false;  // Flag para sinalizar atualização da matriz
-volatile uint32_t ultima_alteracao_led_vermelho = 0;  // Para controle de tempo do LED vermelho
+static volatile bool atualiza_leds = false;  // Flag para sinalizar atualização da matriz
+static volatile uint32_t ultima_alteracao_led_vermelho = 0;  // Para controle de tempo do LED vermelho
 
 volatile uint32_t ultimo_tempo_button_a = 0;  // Para armazenar o tempo da última interrupção acionada pelo bottão A
 volatile uint32_t ultimo_tempo_button_b = 0;  // Para armazenar o tempo da última interrupção acionada pelo bottão B
@@ -113,7 +114,7 @@ void npWrite() {
   sleep_us(100); // Espera 100us, sinal de RESET do datasheet.
 }
 
-// Inicializa as gpio referentes aos botôes e leds, alem de colocar os 3 botões em pull_up 
+// Inicializa as gpio referentes aos botões e leds, alem de colocar os 3 botões em pull_up 
 void inicializar_leds_e_botoes(){
     gpio_init(BUTTON_A);
     gpio_set_dir(BUTTON_A,GPIO_IN);
@@ -151,9 +152,9 @@ void desenhar_na_matriz(int posicoes[], int tamanho_posicoes, int red, int green
     
 }
 
-
+// Desenha baseado em que número o contador está
 void mostra_numero_baseado_no_contador(){
-    switch (incrementa_ou_decrementa_led) // Desenha baseado em que número o contador está
+    switch (incrementa_ou_decrementa_led) 
     {
     case 0:
         desenhar_na_matriz(index_posicoes_zero,14,255,255,255);// Branco
@@ -189,7 +190,7 @@ void mostra_numero_baseado_no_contador(){
 }
 
 
-// Função que captura a interrupção global e baseada em qual gpio mandou a interrupção ela ativa a a lógica correspondente
+// Função que captura a interrupção global e baseada em qual gpio mandou a interrupção ela ativa a lógica correspondente
 static void gpio_irq_handler(uint gpio, uint32_t events) {
     if (gpio == BUTTON_A) {
         // Interrupção que trata de aumentar o número mostrado pela matriz de leds
@@ -217,14 +218,14 @@ static void gpio_irq_handler(uint gpio, uint32_t events) {
         // O tempo atual corresponde ao último tempo que o botão foi pressionado, ja que ele passou pela verificação acima
         ultimo_tempo_button_b = tempo_atual;
 
-        // impede do contador de ficar menor que 10 e diminui ele para que seja atualizado no loop principal
+        // impede do contador de ficar menor que 0 e diminui ele para que seja atualizado no loop principal
         if (incrementa_ou_decrementa_led - 1 >= 0) incrementa_ou_decrementa_led--;
 
         // Muda o estado da flag para que ocorra a atualização dos leds apos o contador ser decrementado
         atualiza_leds = true;
 
     } else if (gpio == BUTTON_JOYSTICK) {
-        // rotina da interrupção para habilitar o modo de gravação do microcontrolador
+        // Interrupção para habilitar o modo de gravação do microcontrolador
         reset_usb_boot(0,0);
     }
 }
@@ -251,8 +252,10 @@ int main() {
         }
 
         // Pisca o LED vermelho 5 vezes por segundo
-        // Cada ciclo "Custa" 200 ms , 100ms do led ligado e 100ms dele desligado , totalizando 5 ciclos por segundo ou seja ele pisca 5 vezes por segundo
-        // Calcula o tempo que passou desde a ultima vez que o led alterou seu estado e verifica se pelo menos 100ms se passaram desde a ultima alteração
+        // Cada ciclo "Custa" 200 ms , 100ms do led ligado e 100ms dele desligado, 
+        // totalizando 5 ciclos por segundo ou seja ele pisca 5 vezes por segundo
+        // Calcula o tempo que passou desde a ultima vez que o led alterou seu estado e 
+        // verifica se pelo menos 100ms se passaram desde a ultima alteração
         if (tempo_atual - ultima_alteracao_led_vermelho >= 100000) {  // 100ms = 100000µs
             gpio_put(LED_RED, !gpio_get(LED_RED));  // Inverte estado
             ultima_alteracao_led_vermelho = tempo_atual;
