@@ -29,7 +29,7 @@ int index_posicoes_tres[]   = {1,2,3,4,8,11,12,13,14,18,21,22,23,24};      // Ta
 int index_posicoes_quatro[] = {1,8,11,12,13,14,15,18,21,24} ;              // Tamanho == 10
 int index_posicoes_cinco[]  = {1,2,3,4,8,11,12,13,14,15,21,22,23,24};      // Tamanho == 14
 int index_posicoes_seis[]   = {1,2,3,4,5,8,11,12,13,14,15,21,22,23,24};    // Tamanho == 15
-int index_posicoes_sete[]   = {4,6,12,18,20,21,22,23,24};                  // Tamanho == 9
+int index_posicoes_sete[]   = {1,8,11,14,15,18,21,22,23,24};               // Tamanho == 10
 int index_posicoes_oito[]   = {1,2,3,4,5,8,11,12,13,14,15,18,21,22,23,24}; // Tamanho == 16
 int index_posicoes_nove[]   = {1,8,11,12,13,14,15,18,21,22,23,24};         // Tamanho == 12
 
@@ -178,7 +178,7 @@ void mostra_numero_baseado_no_contador(){
         desenhar_na_matriz(index_posicoes_seis,15,255,140,0); // Laranja
         break;
     case 7:
-        desenhar_na_matriz(index_posicoes_sete,9,139,0,255); // Roxo
+        desenhar_na_matriz(index_posicoes_sete,10,139,0,255); // Roxo
         break;
     case 8:
         desenhar_na_matriz(index_posicoes_oito,16,139,69,19); // Branco
